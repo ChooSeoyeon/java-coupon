@@ -1,0 +1,1 @@
+GET localhost:8080/coupons/1/used-count
