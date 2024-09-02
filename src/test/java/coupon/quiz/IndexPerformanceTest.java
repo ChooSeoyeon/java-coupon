@@ -3,6 +3,7 @@ package coupon.quiz;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import io.restassured.RestAssured;
+import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
@@ -164,15 +165,13 @@ public class IndexPerformanceTest {
         }
 
         Thread.sleep(MILLISECONDS_IN_SECOND);    // 스레드에 실행 요청 후 1초간 대기한 후 요청을 시작하도록 변경함
+        LocalDateTime startTime = LocalDateTime.now();
         running.set(true); // 요청 시작
         Thread.sleep(TEST_DURATION_SECONDS * MILLISECONDS_IN_SECOND); // 요청 실행할 시간 (10초)
         running.set(false); // 요청 중지
-
+        logger.info("요청 시작 시간 {}", startTime);
         executorService.shutdown(); // 더이상 새로운 작업 받지 않겠단 신호 보냄 (이미 제출된 작업은 계속 실행됨)
         executorService.awaitTermination(10, TimeUnit.SECONDS); // 모든 스레드가 작업 완료할 때까지 최대 10초동안 대기
-//        if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) { // 더 긴 대기 시간 설정
-//            executorService.shutdownNow(); // 강제 종료
-//        }
     }
 
     // 주어진 시간동안 실제 요청을 보내고 응답 시간을 측정하는 메서드
@@ -199,35 +198,5 @@ public class IndexPerformanceTest {
             requestCount.incrementAndGet(); // 요청 횟수 증가시킴
         }
         totalElapsedTime.addAndGet(elapsedTime);
-
-        // 1-1. 원래 코드 문제점 분석
-//        long elapsedTime = 0;
-//        int count = 1;
-//        while (running.get()) { // 요청이 가능한 상태에서 (요청 실행 시간인 10초동안)
-//            logger.info("요청 시작 " + count++);
-//            long startTime = System.currentTimeMillis();
-//            try {
-//                runnable.run(); // 요청 보냄 (스레드의 작업)
-//            } catch (Exception e) {
-//                logger.error("실행 에러 발생");
-//                e.printStackTrace(); // 예외 발생 시 스택 트레이스 출력
-//                break; // 예외가 발생하면 루프 종료
-//            }
-//            long endTime = System.currentTimeMillis();
-//
-//            elapsedTime += endTime - startTime; // 각 요청에 걸린 시간을 총 경과 시간에 더함
-//            requestCount.incrementAndGet(); // 요청 횟수 증가시킴
-//        }
-//        totalElapsedTime.addAndGet(elapsedTime);
-
-            // 2. 개선한 코드
-//        while (running.get()) { // 요청이 가능한 상태에서 (요청 실행 시간인 10초동안)
-//            long startTime = System.currentTimeMillis();
-//            runnable.run(); // 요청 보냄 (스레드의 작업)
-//            long endTime = System.currentTimeMillis();
-//
-//            requestCount.incrementAndGet(); // 요청 횟수 증가시킴
-//            totalElapsedTime.addAndGet(endTime - startTime);
-//        }
     }
 }

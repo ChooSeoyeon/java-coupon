@@ -7,6 +7,9 @@ drop index idx_coupon_id
 create index idx_used_coupon
     on member_coupon(coupon_id, used);
 
+create index idx_monthly_member_benefit_amount
+    on monthly_member_benefit(year, month, coupon_discount_amount);
+
 --
 
 show index from member_coupon;
